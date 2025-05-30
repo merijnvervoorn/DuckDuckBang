@@ -30,33 +30,13 @@
     "icon": "icons/kagi.png" 
   },
   {
-    "name": "Mojeek",
-    "url": "https://www.mojeek.com/search?q=",
-    "icon": "icons/mojeek.png"
-  },
-  {
     "name": "Perplexity",
     "url": "https://www.perplexity.ai/search?q=",
     "icon": "icons/perplexity.png" 
   },
   {
-    "name": "Qwant",
-    "url": "https://www.qwant.com/?q=",
-    "icon": "icons/qwant.png"
-  },
-  {
     "name": "Startpage",
     "url": "https://www.startpage.com/search?q=",
     "icon": "icons/startpage.png"
-  },
-  {
-    "name": "Yahoo",
-    "url": "https://search.yahoo.com/search?p=",
-    "icon": "icons/yahoo.png"
-  },
-  {
-    "name": "Yandex",
-    "url": "https://yandex.com/search/?text=",
-    "icon": "icons/yandex.png"
-  }  
+  }
 ]
