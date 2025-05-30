@@ -1,6 +1,6 @@
 # DuckDuckBang — GNOME Shell Quick Web Search with !Bangs
 
-![DuckDuckBang Logo](bang.png)
+<img src="bang.png" alt="DuckDuckBang Logo" width="200"/>
 
 DuckDuckBang is a GNOME Shell extension that combines Quick Web Search and !Bangs into one icon in the overview menu. It supports:
 
