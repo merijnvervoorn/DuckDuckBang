@@ -1,14 +1,8 @@
-Great you got it working! I can help you combine and polish those READMEs into one clean, friendly, and clear README for your combined GNOME Shell extension supporting both bangs and web search — and without mentioning the Makefile since you don’t use it.
-
-Here’s a draft you can adapt:
-
----
-
 # DuckDuckBang — GNOME Shell Quick Web Search with !Bangs
 
 ![DuckDuckBang Logo](bang.png)
 
-DuckDuckBang is a GNOME Shell extension that lets you quickly search the web directly from the GNOME search bar. It supports:
+DuckDuckBang is a GNOME Shell extension that combines Quick Web Search and !Bangs into one icon in the overview menu. It supports:
 
 * [**!Bangs**](https://github.com/suvanbanerjee/gnome-bangs) — allows you to quickly search using !bangs from your GNOME search. Also allows you to set custom bangs (e.g., `!w GNOME` for Wikipedia, `!yt cats` for YouTube).
 * [**Quick Web Search**](https://gitlab.com/chet-buddy/quick-web-search) — Quickly browse the web through Gnome Shell. Simply press the Super key, enter your search and select "Web Search". Your search will appear in your default browser and selected search engine.
