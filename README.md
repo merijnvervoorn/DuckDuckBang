@@ -1,33 +1,76 @@
-# !Bangs Search
+Great you got it working! I can help you combine and polish those READMEs into one clean, friendly, and clear README for your combined GNOME Shell extension supporting both bangs and web search — and without mentioning the Makefile since you don’t use it.
 
-<img src="bang.png" width="200" height="200">
+Here’s a draft you can adapt:
 
-Bangs Search is a GNOME Shell extension that allows you to quickly search using !bangs from your GNOME search. It is inspired by DuckDuckGo's !bangs feature.
+---
 
-[<img src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true" height="100">](https://extensions.gnome.org/extension/7824/bangs-search/)
+# DuckDuckBang — GNOME Shell Quick Web Search with !Bangs
+
+![DuckDuckBang Logo](bang.png)
+
+DuckDuckBang is a GNOME Shell extension that lets you quickly search the web directly from the GNOME search bar. It supports:
+
+* [**!Bangs**](https://github.com/suvanbanerjee/gnome-bangs) — allows you to quickly search using !bangs from your GNOME search. Also allows you to set custom bangs (e.g., `!w GNOME` for Wikipedia, `!yt cats` for YouTube).
+* [**Quick Web Search**](https://gitlab.com/chet-buddy/quick-web-search) — Quickly browse the web through Gnome Shell. Simply press the Super key, enter your search and select "Web Search". Your search will appear in your default browser and selected search engine.
+
+---
 
 ## Usage
 
-To use Bangs Search, simply type `!` followed by the bang command you want to use in the GNOME search bar. For example, to search for `!w` in Wikipedia, type `!w GNOME` or for google search, type `!g GNOME`.
+* Press the **Super** (Windows) key to open the GNOME overview search.
+* To use a bang search, type `!` followed by the bang command and your query. For example:
 
-### Pro Tip
+  * `!w GNOME` — search Wikipedia
+  * `!yt cute cats` — search YouTube
+* For a regular web search, just type your query (without a bang) and select **Web Search** from the results.
+* Select the result or press Enter to open the browser with your search.
 
-Use it with the `Super` key to quickly search for anything on the web. Alternatively, use the Searchlight extension to assign a keyboard shortcut to open the search bar and then type `!` followed by the bang command. Trust me, it's faster than opening a browser and typing the search query.
+---
 
 ## Installation
 
-To locally install and run use the Makefile:
+1. Clone or download this repository to your GNOME Shell extensions folder:
 
 ```bash
-make install
+git clone https://github.com/merijnvervoorn/DuckDuckBang.git ~/.local/share/gnome-shell/extensions/duckduckbang@merijn
 ```
 
-To uninstall:
+2. Restart GNOME Shell (press `Alt+F2`, type `r`, and press Enter) or log out and log back in.
 
-```bash
-make uninstall
+3. Enable the extension via **GNOME Extensions** app or [extensions.gnome.org](https://extensions.gnome.org/).
+
+---
+
+## Configuration
+
+* Open the extension settings to choose your preferred search engine.
+* To add or modify bang commands, edit the `bangs.json` file located at:
+
 ```
+~/.config/bangs.json
+```
+
+* To add more search engines, edit the `search-engines.json` file inside the extension folder:
+
+```
+~/.local/share/gnome-shell/extensions/duckduckbang@merijn/search-engines.json
+```
+
+---
+
+## Screenshots
+
+![Bangs Search Example](./screenshots/bangs-search.png)
+*Search using bangs from the GNOME Shell search.*
+
+![Web Search Example](./screenshots/web-search.png)
+*Regular web search result launching your browser.*
+
+---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+

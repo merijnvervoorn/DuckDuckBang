@@ -4,14 +4,44 @@ import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-export default class BangsSearchPreferences extends ExtensionPreferences {
+export default class CombinedPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
         const page = new Adw.PreferencesPage();
-        const group = new Adw.PreferencesGroup({
+        window.add(page);
+
+        // --- Search Engine Selector ---
+        const searchGroup = new Adw.PreferencesGroup({
+            title: _('Search Engine'),
+            description: _('Choose your default search engine.'),
+        });
+        page.add(searchGroup);
+
+        const searchEngineFile = this.dir.get_child('search-engines.json');
+        const [, contents] = searchEngineFile.load_contents(null);
+        const decoder = new TextDecoder();
+        const json = JSON.parse(decoder.decode(contents));
+        const searchEngineNames = json.map(d => d.name);
+
+        const list = new Gtk.StringList();
+        searchEngineNames.forEach(d => list.append(d));
+
+        const dropdown = new Adw.ComboRow({
+            title: _('Search engine'),
+            model: list,
+            selected: settings.get_enum('search-engine'),
+        });
+
+        settings.bind('search-engine', dropdown, 'selected', Gio.SettingsBindFlags.DEFAULT);
+        searchGroup.add(dropdown);
+
+        // --- Custom Bangs Management ---
+        const bangsGroup = new Adw.PreferencesGroup({
             title: _('Custom Bangs'),
             description: _('Add or modify custom bangs. Ensure URLs include "{query}".'),
         });
+        page.add(bangsGroup);
+
         let bangs = this._loadBangsFromFile();
         const addBangRow = (bang, index) => {
             const keyEntry = new Gtk.Entry({
@@ -34,7 +64,7 @@ export default class BangsSearchPreferences extends ExtensionPreferences {
             deleteButton.connect('clicked', () => {
                 bangs.splice(index, 1);
                 this._saveBangsToFile(bangs);
-                group.remove(row);
+                bangsGroup.remove(row);
             });
 
             const row = new Adw.ActionRow();
@@ -42,10 +72,11 @@ export default class BangsSearchPreferences extends ExtensionPreferences {
             row.add_suffix(urlEntry);
             row.add_suffix(deleteButton);
 
-            group.add(row);
+            bangsGroup.add(row);
         };
 
         bangs.forEach((bang, index) => addBangRow(bang, index));
+
         const addButton = new Gtk.Button({ label: _('Add Bang') });
         addButton.connect('clicked', () => {
             const newBang = { key: '', url: '' };
@@ -61,6 +92,7 @@ export default class BangsSearchPreferences extends ExtensionPreferences {
             halign: Gtk.Align.CENTER,
         });
         addBox.append(addButton);
+
         const addGroup = new Adw.PreferencesGroup();
         addGroup.add(addBox);
         const restartLabel = new Gtk.Label({
@@ -69,9 +101,10 @@ export default class BangsSearchPreferences extends ExtensionPreferences {
             margin_top: 10,
         });
         addGroup.add(restartLabel);
-        page.add(group);
         page.add(addGroup);
-        window.add(page);
+
+        // Retain settings
+        window._settings = settings;
     }
 
     _onBangChanged(bangs, index, keyEntry, urlEntry) {
@@ -79,7 +112,6 @@ export default class BangsSearchPreferences extends ExtensionPreferences {
             key: keyEntry.text,
             url: urlEntry.text,
         };
-
         this._validateAndSave(bangs);
     }
 

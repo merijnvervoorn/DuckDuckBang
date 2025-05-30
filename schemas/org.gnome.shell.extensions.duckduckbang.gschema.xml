@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.duckduckbang" path="/org/gnome/shell/extensions/duckduckbang/">
+    <key name="search-engine" type="i">
+      <default>0</default>
+      <summary>DuckDuckBang</summary>
+      <description>
+        A list of custom bangs where each entry is a JSON object containing 
+        the keys "key" and "url". Example: [{"key":"g","url":"https://google.com/search?q={query}"}].
+        And otherwise well behave as a web search
+      </description>
+    </key>
+  </schema>
+</schemalist>
