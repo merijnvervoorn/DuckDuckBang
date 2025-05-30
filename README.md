@@ -4,8 +4,8 @@
 
 DuckDuckBang is a GNOME Shell extension that combines Quick Web Search and !Bangs into one icon in the overview menu. It supports:
 
-* [**!Bangs**](https://github.com/suvanbanerjee/gnome-bangs) — allows you to quickly search using !bangs from your GNOME search. Also allows you to set custom bangs (e.g., `!w GNOME` for Wikipedia, `!yt cats` for YouTube).
-* [**Quick Web Search**](https://gitlab.com/chet-buddy/quick-web-search) — Quickly browse the web through Gnome Shell. Simply press the Super key, enter your search and select "Web Search". Your search will appear in your default browser and selected search engine.
+* [**!Bangs**](https://github.com/suvanbanerjee/gnome-bangs): allows you to quickly search using !bangs from your GNOME search. Also allows you to set custom bangs (e.g., `!w GNOME` for Wikipedia, `!yt cats` for YouTube).
+* [**Quick Web Search**](https://gitlab.com/chet-buddy/quick-web-search): Quickly browse the web through Gnome Shell. Simply press the Super key, enter your search and select "Web Search". Your search will appear in your default browser and selected search engine.
 
 ---
 
@@ -14,8 +14,8 @@ DuckDuckBang is a GNOME Shell extension that combines Quick Web Search and !Bang
 * Press the **Super** (Windows) key to open the GNOME overview search.
 * To use a bang search, type `!` followed by the bang command and your query. For example:
 
-  * `!w GNOME` — search Wikipedia
-  * `!yt cute cats` — search YouTube
+  * `!w GNOME`: search Wikipedia
+  * `!yt cute cats`: search YouTube
 * For a regular web search, just type your query (without a bang) and select **Web Search** from the results.
 * Select the result or press Enter to open the browser with your search.
 
