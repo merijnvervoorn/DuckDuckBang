@@ -54,10 +54,12 @@ git clone https://github.com/merijnvervoorn/DuckDuckBang.git ~/.local/share/gnom
 
 ## Screenshots
 
-![Bangs Search Example](./screenshots/bangs-search.png)
+![bangs-search](https://github.com/user-attachments/assets/c5a33fa2-2efc-41c2-b152-9ef8f052de72)
+
 *Search using bangs from the GNOME Shell search.*
 
-![Web Search Example](./screenshots/web-search.png)
+![web-search](https://github.com/user-attachments/assets/a9456623-3a24-4223-8103-14e6d63cc001)
+
 *Regular web search result launching your browser.*
 
 ---
