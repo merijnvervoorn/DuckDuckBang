@@ -1,4 +1,4 @@
-# DuckDuckBang — GNOME Shell Quick Web Search with !Bangs
+# DuckDuckBang: GNOME Shell Quick Web Search with !Bangs
 
 <img src="bang.png" alt="DuckDuckBang Logo" width="200"/>
 
