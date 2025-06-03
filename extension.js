@@ -225,7 +225,7 @@ export default class DuckDuckBang extends Extension {
         if (!this._settings) {
             try {
                 // Create Gio.Settings directly without ExtensionUtils
-                this._settings = new Gio.Settings({ schema_id: 'org.gnome.shell.extensions.duckduckbang' });
+                this._settings = new this.getSettings({ schema_id: 'org.gnome.shell.extensions.duckduckbang' });
                 console.log('Settings loaded successfully');
             } catch (error) {
                 console.error('Failed to load settings:', error);
