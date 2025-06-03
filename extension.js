@@ -221,26 +221,6 @@ export default class DuckDuckBang extends Extension {
         this._settings = null;
     }
 
-    getSettings() {
-        if (!this._settings) {
-            try {
-                // Create Gio.Settings directly without ExtensionUtils
-                this._settings = new this.getSettings({ schema_id: 'org.gnome.shell.extensions.duckduckbang' });
-                console.log('Settings loaded successfully');
-            } catch (error) {
-                console.error('Failed to load settings:', error);
-                // Return a mock settings object that returns default values
-                return {
-                    get_int: (key) => {
-                        console.log(`Mock settings returning 0 for key: ${key}`);
-                        return 0;
-                    }
-                };
-            }
-        }
-        return this._settings;
-    }
-
     _setSearchEngines() {
         const file = this.dir.get_child('search-engines.json');
         try {
