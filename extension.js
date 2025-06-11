@@ -42,15 +42,20 @@ class BangsProvider {
 
     activateResult(result, terms) {
         const input = terms.join(' ');
-        const match = input.match(/^!(\S+)\s+(.+)$/);
+        // Improved bang pattern matching to handle both with and without space
+        const match = input.match(/^!(\S+)(?:\s+(.+))?$/);
         if (match) {
-            const [_, bangKey, query] = match;
-            let url = `https://duckduckgo.com/?t=h_&q=!${bangKey}+${encodeURIComponent(query)}`;
+            const [_, bangKey, query = ''] = match;
+            let url = `https://duckduckgo.com/?t=h_&q=!${bangKey}${query ? '+' + encodeURIComponent(query) : ''}`;
             const bang = this.bangsData.find(b => b.key === bangKey);
             if (bang) {
-                url = bang.url.replace('{query}', encodeURIComponent(query));
+                url = bang.url.replace('{query}', encodeURIComponent(query || ''));
             }
-            Gio.AppInfo.launch_default_for_uri(url, null);
+            try {
+                Gio.AppInfo.launch_default_for_uri(url, null);
+            } catch (error) {
+                console.error('Failed to launch bang URL:', error);
+            }
         }
     }
 
@@ -59,7 +64,9 @@ class BangsProvider {
             const cancelledId = cancellable.connect(() => reject(new Error('Search Cancelled')));
             
             const input = terms.join(' ');
-            const results = /^!(\w+)\s+/.test(input) ? ['bang-search'] : [];
+            // Check if input starts with ! and has at least one character after it
+            const hasBang = input.startsWith('!') && input.length > 1;
+            const results = hasBang ? ['bang-search'] : [];
             
             cancellable.disconnect(cancelledId);
             if (!cancellable.is_cancelled()) {
@@ -83,6 +90,8 @@ class BangsProvider {
             const { scaleFactor } = St.ThemeContext.get_for_stage(global.stage);
             const bangIcon = Gio.icon_new_for_string(`${this._extension.path}/bang.png`);
             
+            console.log(`BangsProvider getResultMetas called for results:`, results);
+            
             const resultMetas = results.map(() => ({
                 id: 'bang-search',
                 name: 'Bangs Search',
@@ -93,6 +102,8 @@ class BangsProvider {
                     height: size * scaleFactor,
                 }),
             }));
+            
+            console.log(`BangsProvider returning ${resultMetas.length} result metas`);
             
             cancellable.disconnect(cancelledId);
             if (!cancellable.is_cancelled()) {
