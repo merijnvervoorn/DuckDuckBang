@@ -25,7 +25,6 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 class BangsProvider {
     constructor(extension) {
         this._extension = extension;
-        this.bangsData = extension.bangsData;
     }
 
     get id() {
@@ -42,19 +41,19 @@ class BangsProvider {
 
     activateResult(result, terms) {
         const input = terms.join(' ');
-        // Improved bang pattern matching to handle both with and without space
         const match = input.match(/^!(\S+)(?:\s+(.+))?$/);
         if (match) {
             const [_, bangKey, query = ''] = match;
             let url = `https://duckduckgo.com/?t=h_&q=!${bangKey}${query ? '+' + encodeURIComponent(query) : ''}`;
-            const bang = this.bangsData.find(b => b.key === bangKey);
+            
+            const bang = this._extension.bangsData.find(b => b.key === bangKey);
             if (bang) {
                 url = bang.url.replace('{query}', encodeURIComponent(query || ''));
             }
             try {
                 Gio.AppInfo.launch_default_for_uri(url, null);
             } catch (error) {
-                console.error('Failed to launch bang URL:', error);
+                console.error(`DuckDuckBang: Failed to launch URL ${url}: ${error.message}`);
             }
         }
     }
@@ -64,7 +63,6 @@ class BangsProvider {
             const cancelledId = cancellable.connect(() => reject(new Error('Search Cancelled')));
             
             const input = terms.join(' ');
-            // Check if input starts with ! and has at least one character after it
             const hasBang = input.startsWith('!') && input.length > 1;
             const results = hasBang ? ['bang-search'] : [];
             
@@ -90,8 +88,6 @@ class BangsProvider {
             const { scaleFactor } = St.ThemeContext.get_for_stage(global.stage);
             const bangIcon = Gio.icon_new_for_string(`${this._extension.path}/bang.png`);
             
-            console.log(`BangsProvider getResultMetas called for results:`, results);
-            
             const resultMetas = results.map(() => ({
                 id: 'bang-search',
                 name: 'Bangs Search',
@@ -102,8 +98,6 @@ class BangsProvider {
                     height: size * scaleFactor,
                 }),
             }));
-            
-            console.log(`BangsProvider returning ${resultMetas.length} result metas`);
             
             cancellable.disconnect(cancelledId);
             if (!cancellable.is_cancelled()) {
@@ -124,8 +118,6 @@ class BangsProvider {
 class WebSearchProvider {
     constructor(extension) {
         this._extension = extension;
-        this.searchEngineIcons = extension.searchEngineIcons;
-        this.searchEngineUrls = extension.searchEngineUrls;
     }
 
     get id() {
@@ -141,7 +133,12 @@ class WebSearchProvider {
     }
 
     activateResult(result, terms) {
-        const settings = this._extension.getSettings();
+        const settings = this._extension.settings;
+        if (!settings) {
+            console.error('DuckDuckBang: Settings object is not initialized.');
+            return;
+        }
+
         const searchEngine = settings.get_int('search-engine');
         const input = terms.join(' ').trim();
 
@@ -149,18 +146,16 @@ class WebSearchProvider {
         let url = input;
         
         if (!urlRegex.test(url)) {
-            // It's a search query, not a URL
-            url = `${this.searchEngineUrls[searchEngine]}${encodeURIComponent(input)}`;
+            const baseUrl = this._extension.searchEngineUrls[searchEngine] || 'https://duckduckgo.com/?q=';
+            url = `${baseUrl}${encodeURIComponent(input)}`;
         } else if (!/^https?:\/\//.test(url)) {
-            // It's a URL but missing protocol
             url = `https://${url}`;
         }
 
-        // Use launch_default_for_uri
         try {
             Gio.AppInfo.launch_default_for_uri(url, null);
         } catch (error) {
-            console.error('Failed to launch URL:', error);
+            console.error(`DuckDuckBang: Failed to launch URL ${url}: ${error.message}`);
         }
     }
 
@@ -169,12 +164,8 @@ class WebSearchProvider {
             const cancelledId = cancellable.connect(() => reject(new Error('Search Cancelled')));
             
             const input = terms.join(' ').trim();
-            console.log(`WebSearchProvider getInitialResultSet called with: "${input}"`);
-            
-            // Don't show Web Search suggestion if input is empty or is a bang (!something)
             const results = (input === '' || input.startsWith('!')) ? [] : ['web-search'];
-            console.log(`WebSearchProvider returning results:`, results);
-            
+
             cancellable.disconnect(cancelledId);
             if (!cancellable.is_cancelled()) {
                 resolve(results);
@@ -194,20 +185,16 @@ class WebSearchProvider {
         return new Promise((resolve, reject) => {
             const cancelledId = cancellable.connect(() => reject(new Error('Operation Cancelled')));
             
-            const settings = this._extension.getSettings();
-            const searchEngine = settings.get_int('search-engine');
+            const settings = this._extension.settings;
+            const searchEngine = settings ? settings.get_int('search-engine') : 0;
             const { scaleFactor } = St.ThemeContext.get_for_stage(global.stage);
             
-            console.log(`WebSearchProvider getResultMetas called for results:`, results);
-            console.log(`Using search engine index: ${searchEngine}`);
-            
-            // Use a fallback icon if the specific one isn't available
             let webIcon;
             try {
-                const iconPath = `${this._extension.path}/${this.searchEngineIcons[searchEngine] || 'duckduckgo.png'}`;
+                const iconName = this._extension.searchEngineIcons[searchEngine] || 'duckduckgo.png';
+                const iconPath = `${this._extension.path}/${iconName}`;
                 webIcon = Gio.icon_new_for_string(iconPath);
             } catch (error) {
-                console.warn('Failed to load search engine icon, using fallback:', error);
                 webIcon = Gio.ThemedIcon.new('web-browser-symbolic');
             }
 
@@ -221,8 +208,6 @@ class WebSearchProvider {
                     height: size * scaleFactor,
                 }),
             }));
-            
-            console.log(`WebSearchProvider returning ${resultMetas.length} result metas`);
             
             cancellable.disconnect(cancelledId);
             if (!cancellable.is_cancelled()) {
@@ -247,39 +232,54 @@ export default class DuckDuckBang extends Extension {
         this.searchEngineUrls = [];
         this.searchEngineIcons = [];
         this.bangsData = [];
-        this._settings = null;
+        this.settings = null;
     }
 
-    _setSearchEngines() {
+    async _setSearchEngines() {
         const file = this.dir.get_child('search-engines.json');
         try {
-            const [, contents] = file.load_contents(null);
+            const contents = await new Promise((resolve, reject) => {
+                file.load_contents_async(null, (file, result) => {
+                    try {
+                        const [, contentsFinish] = file.load_contents_finish(result);
+                        resolve(contentsFinish);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
             const json = JSON.parse(new TextDecoder().decode(contents));
             this.searchEngineUrls = json.map(d => d.url);
             this.searchEngineIcons = json.map(d => d.icon);
-            console.log('Loaded search engines:', this.searchEngineUrls);
         } catch (error) {
-            console.error('Failed to load search engines:', error);
-            // Set default values
+            console.warn(`DuckDuckBang: Failed to load search-engines.json, using defaults. Error: ${error.message}`);
             this.searchEngineUrls = ['https://duckduckgo.com/?q='];
             this.searchEngineIcons = ['duckduckgo.png'];
-            console.log('Using default search engines:', this.searchEngineUrls);
         }
     }
 
-    _loadBangs() {
+    async _loadBangs() {
         const bangsFile = Gio.File.new_for_path(`${GLib.get_user_config_dir()}/bangs.json`);
         try {
-            const [, contents] = bangsFile.load_contents(null);
+            const contents = await new Promise((resolve, reject) => {
+                bangsFile.load_contents_async(null, (file, result) => {
+                    try {
+                        const [, contentsFinish] = bangsFile.load_contents_finish(result);
+                        resolve(contentsFinish);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
             this.bangsData = JSON.parse(new TextDecoder().decode(contents));
         } catch (error) {
-            console.debug('No bangs file found or failed to parse:', error);
+            console.info(`DuckDuckBang: Custom bangs file not found or unreadable at ~/.config/bangs.json. Using empty array.`);
             this.bangsData = [];
         }
     }
 
     enable() {
-        console.log('DuckDuckBang extension enabling...');
+        this.settings = this.getSettings();
         
         this._setSearchEngines();
         this._loadBangs();
@@ -290,18 +290,12 @@ export default class DuckDuckBang extends Extension {
         this._providers.push(webProvider, bangsProvider);
 
         for (const provider of this._providers) {
-            console.log(`Adding provider: ${provider.id}`);
             Main.overview.searchController.addProvider(provider);
         }
-        
-        console.log('DuckDuckBang extension enabled');
     }
 
     disable() {
-        console.log('DuckDuckBang extension disabling...');
-        
         for (const provider of this._providers) {
-            console.log(`Removing provider: ${provider.id}`);
             Main.overview.searchController.removeProvider(provider);
         }
 
@@ -309,8 +303,6 @@ export default class DuckDuckBang extends Extension {
         this.searchEngineUrls = [];
         this.searchEngineIcons = [];
         this.bangsData = [];
-        this._settings = null;
-        
-        console.log('DuckDuckBang extension disabled');
+        this.settings = null;
     }
 }
