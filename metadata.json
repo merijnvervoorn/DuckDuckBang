@@ -3,7 +3,7 @@
   "description": "Use Super key for quick web search and add custom !bangs. Combination of Quick Web Search and !Bangs Search",
   "uuid": "duckduckbang@merijn",
   "shell-version": [
-    "45", "46", "47", "48"
+    "45", "46", "47", "48", "49", "50"
   ],
   "url": "https://github.com/merijnvervoorn/duckduckbang",
   "settings-schema": "org.gnome.shell.extensions.duckduckbang"
